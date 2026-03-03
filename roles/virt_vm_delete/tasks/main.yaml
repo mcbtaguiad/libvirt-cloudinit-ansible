@@ -1,0 +1,56 @@
+---
+- name: Fail if vm_name is not defined
+  fail:
+    msg: "vm_name must be defined to delete a VM"
+  when: vm_name == ""
+
+- name: Check if VM exists
+  command: virsh dominfo "{{ vm_name }}"
+  register: vm_info
+  ignore_errors: true
+
+- name: Shut down VM if running
+  command: virsh shutdown "{{ vm_name }}"
+  when: vm_info.rc == 0
+  ignore_errors: true
+
+- name: Force destroy VM if still running
+  command: virsh destroy "{{ vm_name }}"
+  when: vm_info.rc == 0
+  ignore_errors: true
+
+- name: Undefine VM
+  command: virsh undefine "{{ vm_name }}"
+  when: vm_info.rc == 0
+  ignore_errors: true
+
+- name: Delete VM disk
+  file:
+    path: "{{ disk_path }}/{{ vm_name }}.qcow2"
+    state: absent
+  ignore_errors: true
+
+- name: Delete temporary cloud-init user-data
+  file:
+    path: "/tmp/{{ vm_name }}-user-data.yaml"
+    state: absent
+  ignore_errors: true
+
+- name: Delete temporary cloud-init meta-data
+  file:
+    path: "/tmp/{{ vm_name }}-meta-data.yaml"
+    state: absent
+  ignore_errors: true
+
+- name: Delete temporary cloud-init network-config
+  file:
+    path: "/tmp/{{ vm_name }}-network-config.yaml"
+    state: absent
+  ignore_errors: true
+
+- name: Delete Seed ISO
+  file:
+    path: "/tmp/{{ vm_name }}-seed.iso"
+    state: absent
+  ignore_errors: true
+

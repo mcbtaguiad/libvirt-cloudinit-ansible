@@ -1,0 +1,4 @@
+---
+# Default variables for VM deletion
+vm_name: ""
+disk_path: "/srv/nvme/libvirt" #/var/lib/libvirt/images

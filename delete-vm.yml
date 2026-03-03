@@ -1,0 +1,17 @@
+---
+- name: Delete multiple VMs
+  hosts: hypervisor
+  # become: true
+  vars:
+    vm_list:
+      - worker01
+      - worker02
+    disk_path: "/srv/nvme/libvirt" #/var/lib/libvirt/images
+  tasks:
+    - name: Delete multiple VMs
+      with_items: "{{ vm_list }}"
+      include_role:
+        name: virt_vm_delete
+      vars:
+        vm_name: "{{ item }}"
+      loop: "{{ vm_list }}"
