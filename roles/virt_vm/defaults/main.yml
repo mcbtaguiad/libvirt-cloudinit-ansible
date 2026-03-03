@@ -1,0 +1,26 @@
+vm_name: srvmnldebvm001
+
+vm_user: mcbtaguiad
+vm_memory: 4096
+vm_vcpus: 2
+vm_disk_size: 50G
+
+ssh_public_key: 
+  - "sh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDtf3e9lQR1uAypz4nrq2nDj0DvZZGONku5wO+M87wUVTistrY8REsWO2W1N"
+
+#ssh_public_key: "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
+
+vm_interface: enp1s0
+
+# Networking
+vm_dhcp: false
+vm_ip: 192.168.254.201
+vm_prefix: 24
+vm_gateway: 192.168.254.254
+vm_dns:
+  - 8.8.8.8
+vm_network_bridge: br0
+
+disk_path: /srv/nvme/libvirt #/var/lib/libvirt/images
+base_image: noble-server-cloudimg-amd64.img
+os_variant: ubuntu24.04

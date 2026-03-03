@@ -1,0 +1,67 @@
+---
+- name: Create QCOW2 disk from backing image
+  command: >
+    qemu-img create
+    -f qcow2
+    -b {{ disk_path }}/{{ base_image }}
+    -F qcow2
+    {{ disk_path }}/{{ vm_name }}.qcow2
+    {{ vm_disk_size }}
+  args:
+    creates: "{{ disk_path }}/{{ vm_name }}.qcow2"
+
+- name: Render user-data
+  template:
+    src: user-data.yaml.j2
+    dest: "/tmp/{{ vm_name }}-user-data.yaml"
+  delegate_to: "{{ inventory_hostname }}"
+
+- name: Render meta-data
+  template:
+    src: meta-data.yaml.j2
+    dest: "/tmp/{{ vm_name }}-meta-data.yaml"
+  delegate_to: "{{ inventory_hostname }}"
+
+- name: Render network-config
+  template:
+    src: network-config.yaml.j2
+    dest: "/tmp/{{ vm_name }}-network-config.yaml"
+  delegate_to: "{{ inventory_hostname }}"
+
+- name: Generate cloud-init seed ISO
+  command: >
+    cloud-localds
+    --network-config=/tmp/{{ vm_name }}-network-config.yaml
+    /tmp/{{ vm_name }}-seed.iso
+    /tmp/{{ vm_name }}-user-data.yaml /tmp/{{ vm_name }}-meta-data.yaml
+  args:
+    creates: "/tmp/{{ vm_name }}-seed.iso"
+  delegate_to: "{{ inventory_hostname }}"
+
+- name: Install VM using virt-install
+  command: >
+    virt-install
+    --name {{ vm_name }}
+    --memory {{ vm_memory }}
+    --vcpus {{ vm_vcpus }}
+    --import
+    --disk path={{ disk_path }}/{{ vm_name }}.qcow2,format=qcow2,bus=virtio
+    --os-variant {{ os_variant }}
+    --network bridge={{ vm_network_bridge }},model=virtio
+    --graphics vnc,listen=0.0.0.0
+    --noautoconsole
+    --cloud-init user-data=/tmp/{{ vm_name }}-user-data.yaml,meta-data=/tmp/{{ vm_name }}-meta-data.yaml,network-config=/tmp/{{ vm_name }}-network-config.yaml
+    --cdrom /tmp/{{ vm_name }}-seed.iso
+  args:
+    creates: "/etc/libvirt/qemu/{{ vm_name }}.xml"
+
+- name: Get VM IP - wait for vm and qemu guest to start
+  command: virsh domifaddr {{ vm_name }} --source agent
+  register: vm_ip_result
+  retries: 20
+  delay: 5
+  until: vm_ip_result.rc == 0 and vm_ip_result.stdout != ""
+
+- name: Show VM IP
+  debug:
+    msg: "VM {{ vm_name }} IP is {{ vm_ip }}"

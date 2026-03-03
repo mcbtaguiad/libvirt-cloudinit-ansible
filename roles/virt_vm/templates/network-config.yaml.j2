@@ -1,0 +1,16 @@
+version: 2
+ethernets:
+  {{ vm_interface }}:
+    dhcp4: {{ 'true' if vm_dhcp else 'false' }}
+{% if not vm_dhcp %}
+    addresses:
+      - {{ vm_ip }}/{{ vm_prefix }}
+    nameservers:
+      addresses:
+{% for dns in vm_dns %}
+        - {{ dns }}
+{% endfor %}
+    routes:
+      - to: 0.0.0.0/0
+        via: {{ vm_gateway }}
+{% endif %}
