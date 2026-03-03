@@ -1,0 +1,12 @@
+services:
+  app:
+      container_name: ansible
+      image: docker.io/mcbtaguiad/ansible:12
+      build:
+          context: .
+          dockerfile: ./docker/Dockerfile
+      # entrypoint: tail -f /dev/null
+      restart: always
+      volumes:
+      - "./:/ansible"
+      - "~/.ssh/:/root/.ssh"
