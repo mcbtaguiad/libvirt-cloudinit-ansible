@@ -1,7 +1,7 @@
 services:
   app:
       container_name: ansible
-      image: docker.io/mcbtaguiad/ansible:12
+      image:  ghcr.io/mcbtaguiad/libvirt-cloudinit-ansible:v1.0.0
       build:
           context: .
           dockerfile: ./docker/Dockerfile
