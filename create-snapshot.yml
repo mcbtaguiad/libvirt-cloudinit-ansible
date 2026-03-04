@@ -1,0 +1,23 @@
+---
+- name: Create snapshot for VMs
+  hosts: hypervisor
+  # become: true
+  vars:
+    snapshot_name: "snap-{{ ansible_date_time.iso8601_basic }}"
+    vm_list:
+      - worker01
+
+  tasks:
+    - name: Create external snapshot
+      command: >
+        virsh snapshot-create-as
+        --domain {{ item }}
+        --name {{ item }}-{{ snapshot_name }}
+        --description "Snapshot created by Ansible"
+        --atomic
+      loop: "{{ vm_list }}"
+
+    - name: Show snapshot created
+      debug:
+        msg: "Snapshot {{ item }}-{{ snapshot_name }} created for {{ item }}"
+      loop: "{{ vm_list }}"
