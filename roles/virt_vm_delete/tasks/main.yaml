@@ -14,6 +14,18 @@
   when: vm_info.rc == 0
   ignore_errors: true
 
+- name: Get snapshot list
+  command: virsh snapshot-list {{ vm_name }} --name
+  register: snap_list
+  failed_when: false
+  changed_when: false
+
+- name: Delete snapshots if exist
+  command: virsh snapshot-delete {{ vm_name }} --snapshotname {{ item }}
+  loop: "{{ snap_list.stdout_lines }}"
+  when: snap_list.stdout_lines | length > 0
+  ignore_errors: true
+
 - name: Force destroy VM if still running
   command: virsh destroy "{{ vm_name }}"
   when: vm_info.rc == 0
