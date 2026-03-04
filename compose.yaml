@@ -1,6 +1,6 @@
 services:
-  app:
-      container_name: ansible
+  ansible-libvirt:
+      container_name: ansible-libvirt
       image:  ghcr.io/mcbtaguiad/libvirt-cloudinit-ansible:v1.0.0
       build:
           context: .
