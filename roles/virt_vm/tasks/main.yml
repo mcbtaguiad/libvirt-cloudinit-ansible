@@ -54,6 +54,26 @@
     --cdrom /tmp/{{ vm_name }}-seed.iso
   args:
     creates: "/etc/libvirt/qemu/{{ vm_name }}.xml"
+  when: not extra_disk
+
+- name: Install VM using virt-install - with extra disk
+  command: >
+    virt-install
+    --name {{ vm_name }}
+    --memory {{ vm_memory }}
+    --vcpus {{ vm_vcpus }}
+    --import
+    --disk path={{ disk_path }}/{{ vm_name }}.qcow2,format=qcow2,bus=virtio
+    --disk path={{ disk_path }}/{{ vm_name }}-data.qcow2,size={{ extra_disk_size }},format=qcow2,bus=virtio
+    --os-variant {{ os_variant }}
+    --network bridge={{ vm_network_bridge }},model=virtio
+    --graphics vnc,listen=0.0.0.0
+    --noautoconsole
+    --cloud-init user-data=/tmp/{{ vm_name }}-user-data.yaml,meta-data=/tmp/{{ vm_name }}-meta-data.yaml,network-config=/tmp/{{ vm_name }}-network-config.yaml
+    --cdrom /tmp/{{ vm_name }}-seed.iso
+  args:
+    creates: "/etc/libvirt/qemu/{{ vm_name }}.xml"
+  when: extra_disk
 
 - name: Get VM IP - wait for vm and qemu guest to start
   command: virsh domifaddr {{ vm_name }} --source agent

@@ -24,3 +24,6 @@ vm_network_bridge: br0
 disk_path: /srv/nvme/libvirt #/var/lib/libvirt/images
 base_image: noble-server-cloudimg-amd64.img
 os_variant: ubuntu24.04
+
+extra_disk: true
+extra_disk_size: 50 # this is in G - this is not a typo
