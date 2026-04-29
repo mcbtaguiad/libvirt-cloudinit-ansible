@@ -42,6 +42,12 @@
     state: absent
   ignore_errors: true
 
+- name: Delete VM disk
+  file:
+    path: "{{ disk_path }}/{{ vm_name }}-data.qcow2"
+    state: absent
+  ignore_errors: true
+
 - name: Delete temporary cloud-init user-data
   file:
     path: "/tmp/{{ vm_name }}-user-data.yaml"
